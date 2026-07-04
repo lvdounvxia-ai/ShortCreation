@@ -1,0 +1,15 @@
+{
+  "name": "@juchuge/api",
+  "version": "0.1.0",
+  "private": true,
+  "description": "剧出格后端 API 雏形",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
+
