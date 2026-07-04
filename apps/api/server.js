@@ -54,6 +54,22 @@ function withOwner(project) {
 }
 
 function routeGet(req, res, url) {
+  if (url.pathname === "/") {
+    return sendJson(res, 200, {
+      ok: true,
+      service: "juchuge-api",
+      message: "剧出格本地后端 API 正在运行。产品页面请打开 GitHub Pages 或本地前端服务。",
+      endpoints: [
+        "/health",
+        "/api/me",
+        "/api/team/members",
+        "/api/projects",
+        "/api/assets?type=role",
+        "/api/model-jobs"
+      ]
+    });
+  }
+
   if (url.pathname === "/health") {
     return sendJson(res, 200, { ok: true, service: "juchuge-api", time: new Date().toISOString() });
   }
