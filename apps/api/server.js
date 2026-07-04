@@ -1,11 +1,25 @@
 const http = require("http");
 const { randomUUID } = require("crypto");
+const fs = require("fs");
+const path = require("path");
 const { URL } = require("url");
 const store = require("./data/store");
 const { JOB_STATUS } = require("../../packages/shared/constants");
 
 const PORT = Number(process.env.PORT || 8787);
 const INVITE_CODE = process.env.INVITE_CODE || "JCG-2026";
+const WEB_ROOT = path.resolve(__dirname, "../../juchuge-prototype");
+const MIME_TYPES = {
+  ".html": "text/html; charset=utf-8",
+  ".css": "text/css; charset=utf-8",
+  ".js": "application/javascript; charset=utf-8",
+  ".json": "application/json; charset=utf-8",
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".svg": "image/svg+xml",
+  ".ico": "image/x-icon"
+};
 
 function sendJson(res, status, payload) {
   res.writeHead(status, {
@@ -19,6 +33,28 @@ function sendJson(res, status, payload) {
 
 function notFound(res) {
   sendJson(res, 404, { error: "not_found" });
+}
+
+function sendStatic(res, pathname) {
+  const normalizedPath = pathname === "/" ? "/index.html" : pathname;
+  const safePath = path.normalize(decodeURIComponent(normalizedPath)).replace(/^(\.\.[/\\])+/, "");
+  const filePath = path.join(WEB_ROOT, safePath);
+
+  if (!filePath.startsWith(WEB_ROOT)) return notFound(res);
+
+  fs.readFile(filePath, (error, content) => {
+    if (error) {
+      if (normalizedPath.includes(".")) return notFound(res);
+      return sendStatic(res, "/index.html");
+    }
+
+    const ext = path.extname(filePath);
+    res.writeHead(200, {
+      "Content-Type": MIME_TYPES[ext] || "application/octet-stream",
+      "Access-Control-Allow-Origin": "*"
+    });
+    res.end(content);
+  });
 }
 
 function readBody(req) {
@@ -54,13 +90,14 @@ function withOwner(project) {
 }
 
 function routeGet(req, res, url) {
-  if (url.pathname === "/") {
+  if (url.pathname === "/api/status") {
     return sendJson(res, 200, {
       ok: true,
       service: "juchuge-api",
-      message: "剧出格本地后端 API 正在运行。产品页面请打开 GitHub Pages 或本地前端服务。",
+      message: "剧出格本地后端 API 正在运行。",
       endpoints: [
         "/health",
+        "/api/status",
         "/api/me",
         "/api/team/members",
         "/api/projects",
@@ -189,6 +226,9 @@ const server = http.createServer(async (req, res) => {
   }
 
   try {
+    if (req.method === "GET" && (url.pathname === "/" || !url.pathname.startsWith("/api") && url.pathname !== "/health")) {
+      return sendStatic(res, url.pathname);
+    }
     if (req.method === "GET") return routeGet(req, res, url);
     if (req.method === "POST") return routePost(req, res, url);
     return sendJson(res, 405, { error: "method_not_allowed" });
