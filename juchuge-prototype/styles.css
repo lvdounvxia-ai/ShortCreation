@@ -1738,6 +1738,7 @@ button {
 
 .short-script-layout-full {
   grid-template-columns: 1fr;
+  width: 100%;
 }
 
 .topic-list.roomy {
@@ -2803,6 +2804,10 @@ button {
   .clip-extract-layout,
   .clip-batch-layout {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .short-script-layout-full {
+    grid-template-columns: 1fr;
   }
 
   .import-page-grid .field-grid-compact {
