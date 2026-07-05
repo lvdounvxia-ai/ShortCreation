@@ -30,8 +30,8 @@ const state = {
 const navItems = [
   { id: "workbench", label: "生产工作台", desc: "任务首页", icon: "layout" },
   { id: "projects", label: "项目", desc: "漫剧 / 短视频 / 切片", icon: "folder" },
-  { id: "assets", label: "资产", desc: "角色 / 场景 / 音乐", icon: "asset" },
   { id: "studio", label: "制作", desc: "三类生产模式", icon: "board" },
+  { id: "assets", label: "资产", desc: "角色 / 场景 / 音乐", icon: "asset" },
   { id: "team", label: "团队管理", desc: "账号 / 角色 / 权限", icon: "users", permission: "team:view" }
 ];
 
