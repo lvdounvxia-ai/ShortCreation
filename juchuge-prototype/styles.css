@@ -2692,30 +2692,18 @@ button {
   background: var(--soft);
 }
 
-.asset-editor-top {
-  display: grid;
-  grid-template-columns: minmax(220px, 0.42fr) minmax(420px, 1fr);
-  gap: 14px;
-  padding: 18px 22px;
-  border-bottom: 1px solid var(--line);
-  background: #fbfbf8;
-}
-
-.asset-editor-top label,
 .role-field-grid label {
   min-width: 0;
   display: grid;
   gap: 7px;
 }
 
-.asset-editor-top span,
 .role-field-grid span {
   color: var(--muted);
   font-size: 12px;
   font-weight: 700;
 }
 
-.asset-editor-top input,
 .role-field-grid input,
 .text-image-panel textarea {
   width: 100%;
@@ -2726,7 +2714,6 @@ button {
   font: inherit;
 }
 
-.asset-editor-top input,
 .role-field-grid input {
   height: 40px;
   padding: 0 12px;
@@ -2734,8 +2721,9 @@ button {
 
 .asset-editor-grid {
   display: grid;
-  grid-template-columns: minmax(360px, 0.82fr) minmax(460px, 1fr);
-  gap: 16px;
+  grid-template-columns: minmax(360px, 0.9fr) minmax(520px, 1.15fr);
+  gap: 18px;
+  align-items: stretch;
   padding: 18px 22px 22px;
 }
 
@@ -2743,6 +2731,14 @@ button {
 .role-edit-body {
   display: grid;
   gap: 14px;
+}
+
+.asset-editor-left {
+  grid-template-rows: auto minmax(260px, 1fr);
+}
+
+.text-image-panel {
+  align-self: end;
 }
 
 .editor-section {
@@ -2813,7 +2809,7 @@ button {
 }
 
 .text-image-panel textarea {
-  min-height: 118px;
+  min-height: 170px;
   resize: vertical;
   border: 0;
   border-bottom: 1px solid var(--line);
@@ -2850,10 +2846,11 @@ button {
 
 .role-edit-body {
   padding: 14px;
+  align-content: start;
 }
 
 .role-image-preview {
-  min-height: 260px;
+  min-height: 330px;
   border-radius: 14px;
   background:
     radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.6), transparent 28%),
@@ -2877,7 +2874,7 @@ button {
 .role-field-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  gap: 10px 12px;
 }
 
 .role-field-grid .wide {
@@ -2991,7 +2988,6 @@ button {
     padding: 18px;
   }
 
-  .asset-editor-top,
   .member-stat-grid,
   .role-select-grid,
   .role-field-grid {

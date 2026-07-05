@@ -614,17 +614,6 @@ function assetEditorPage() {
           </div>
         </div>
 
-        <div class="asset-editor-top">
-          <label>
-            <span>${typeLabel}名称</span>
-            <input value="${asset.name}" />
-          </label>
-          <label>
-            <span>${typeLabel}描述</span>
-            <input value="${asset.meta}" />
-          </label>
-        </div>
-
         <div class="asset-editor-grid">
           <div class="asset-editor-left">
             <section class="editor-section variant-list-panel">
@@ -652,7 +641,7 @@ function assetEditorPage() {
               <div class="generation-control-row">
                 <button class="control-pill active" data-action="toast" data-message="已选择 Seedance 2.0">Seedance 2.0</button>
                 <button class="control-pill" data-action="toast" data-message="已切换为 9:16">9:16</button>
-                <button class="primary-button" data-action="toast" data-message="已提交${asset.name}形象生成任务">生成形象</button>
+                <button class="primary-button" data-action="toast" data-message="已提交${asset.name}${editorLabel.generateNoun}生成任务">生成${editorLabel.generateNoun}</button>
               </div>
             </section>
           </div>
@@ -693,7 +682,8 @@ function assetEditorLabels(typeLabel) {
       tones: ["空间结构清晰 / 可复用", "自然光 / 人物入场", "烛火与暗光 / 情绪压迫", "局部细节 / 近景复用"],
       secondaryField: "光影风格",
       secondaryValue: "国漫二次元 / 电影感光影",
-      consistencyNote: "空间结构、主色调和光影方向"
+      consistencyNote: "空间结构、主色调和光影方向",
+      generateNoun: "场景"
     };
   }
   if (typeLabel === "道具") {
@@ -704,7 +694,8 @@ function assetEditorLabels(typeLabel) {
       tones: ["正面展示 / 干净背景", "角色手持 / 动作衔接", "纹理细节 / 关键剧情", "冲突后状态 / 分镜复用"],
       secondaryField: "材质质感",
       secondaryValue: "精致纹理 / 高识别度",
-      consistencyNote: "轮廓、材质、颜色和关键纹理"
+      consistencyNote: "轮廓、材质、颜色和关键纹理",
+      generateNoun: "道具"
     };
   }
   return {
@@ -714,7 +705,8 @@ function assetEditorLabels(typeLabel) {
     tones: ["正面半身 / 统一角色脸", "宫门反击 / 情绪克制", "雨夜披风 / 暗光", "眼神坚定 / 近景"],
     secondaryField: "音色",
     secondaryValue: "冷静女声 / 克制反击",
-    consistencyNote: "五官、服饰主色和气质"
+    consistencyNote: "五官、服饰主色和气质",
+    generateNoun: "形象"
   };
 }
 
