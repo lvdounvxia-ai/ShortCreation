@@ -712,6 +712,14 @@ button {
   background: var(--iris-soft);
 }
 
+.asset-editor-page {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
 .asset-row {
   display: grid;
   grid-template-columns: 42px 1fr auto;
@@ -2602,6 +2610,14 @@ button {
   padding: 18px 22px;
 }
 
+.asset-editor-head > div:first-child {
+  min-width: 240px;
+}
+
+.asset-editor-back {
+  margin-bottom: 10px;
+}
+
 .asset-editor-head h2 {
   margin: 4px 0 0;
   font-size: 22px;
@@ -2609,6 +2625,30 @@ button {
 
 .asset-editor-head .icon-button {
   font-size: 22px;
+}
+
+.asset-editor-switcher {
+  max-width: min(640px, 58vw);
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.asset-editor-switcher button {
+  min-height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--muted);
+  padding: 0 13px;
+  font-weight: 700;
+}
+
+.asset-editor-switcher button.active {
+  color: var(--ink);
+  border-color: rgba(23, 33, 43, 0.38);
+  background: var(--soft);
 }
 
 .asset-editor-top {

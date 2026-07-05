@@ -344,7 +344,6 @@ function shell(content) {
         </header>
         ${content}
       </main>
-      ${state.assetEditorOpen ? assetEditorModal() : ""}
       ${state.toast ? `<div class="toast">${state.toast}</div>` : ""}
     </div>
   `;
@@ -515,6 +514,8 @@ function mangaEpisodesPage() {
 }
 
 function mangaAssetsPage() {
+  if (state.assetEditorOpen) return assetEditorPage();
+
   const tabs = [
     ["roles", "全部角色 22"],
     ["scenes", "全部场景 67"],
@@ -577,25 +578,35 @@ function getMangaAssetContext() {
   };
 }
 
-function assetEditorModal() {
-  const { assetCards, typeLabel } = getMangaAssetContext();
-  const asset = assetCards[state.selectedAssetCard] || assetCards[0] || roleAssets[0];
+function assetEditorPage() {
+  const { assets, typeLabel } = getMangaAssetContext();
+  const assetIndex = state.selectedAssetCard % assets.length;
+  const asset = assets[assetIndex] || assets[0] || roleAssets[0];
+  const editorLabel = assetEditorLabels(typeLabel);
   const variants = [
-    { name: "基础形象", scene: "通用", status: "已生成", tone: "正面半身 / 统一角色脸" },
-    { name: "红色嫁衣", scene: "1-1", status: "已确认", tone: "宫门反击 / 情绪克制" },
-    { name: "冷宫夜行", scene: "1-3", status: "待补图", tone: "雨夜披风 / 暗光" },
-    { name: "特写表情", scene: "分镜复用", status: "草稿", tone: "眼神坚定 / 近景" }
+    { name: editorLabel.variantNames[0], scene: "通用", status: "已生成", tone: editorLabel.tones[0] },
+    { name: editorLabel.variantNames[1], scene: "1-1", status: "已确认", tone: editorLabel.tones[1] },
+    { name: editorLabel.variantNames[2], scene: "1-3", status: "待补图", tone: editorLabel.tones[2] },
+    { name: editorLabel.variantNames[3], scene: "分镜复用", status: "草稿", tone: editorLabel.tones[3] }
   ];
   const currentVariant = variants[state.selectedAssetVariant] || variants[0];
-  return `
-    <div class="modal-backdrop" data-close-asset-editor>
-      <section class="asset-editor-modal" role="dialog" aria-modal="true" aria-label="${typeLabel}编辑" data-modal-surface>
+  return mangaPageShell(
+    "Step 03",
+    `${typeLabel}资产编辑`,
+    "在二级页面中维护资产基础信息、版本列表、生成提示词和分镜复用配置。",
+    `
+      <section class="asset-editor-page" aria-label="${typeLabel}资产编辑">
         <div class="asset-editor-head">
           <div>
+            <button class="ghost-button asset-editor-back" data-close-asset-editor>← 返回资产库</button>
             <p class="eyebrow">${typeLabel}资产编辑</p>
             <h2>${asset.name}</h2>
           </div>
-          <button class="icon-button" data-close-asset-editor>×</button>
+          <div class="asset-editor-switcher" aria-label="切换${typeLabel}">
+            ${assets.map((item, index) => `
+              <button class="${assetIndex === index ? "active" : ""}" data-open-asset-editor="${index}">${item.name}</button>
+            `).join("")}
+          </div>
         </div>
 
         <div class="asset-editor-top">
@@ -613,8 +624,8 @@ function assetEditorModal() {
           <div class="asset-editor-left">
             <section class="editor-section variant-list-panel">
               <div class="editor-section-head">
-                <span>子形象列表</span>
-                <button class="ghost-button" data-action="toast" data-message="已新增子形象草稿">${icon("plus")}新增</button>
+                <span>${editorLabel.variantListTitle}</span>
+                <button class="ghost-button" data-action="toast" data-message="已新增${editorLabel.variantNoun}草稿">${icon("plus")}新增</button>
               </div>
               <div class="variant-list">
                 ${variants.map((variant, index) => `
@@ -650,20 +661,56 @@ function assetEditorModal() {
               <div class="role-image-preview"><span>${asset.name.slice(0, 1)}</span></div>
               <div class="role-field-grid">
                 <label><span>${typeLabel}名称</span><input value="${asset.name}" /></label>
-                <label><span>音色</span><input value="${typeLabel === "角色" ? "冷静女声 / 克制反击" : "默认旁白"}" /></label>
+                <label><span>${editorLabel.secondaryField}</span><input value="${editorLabel.secondaryValue}" /></label>
                 <label class="wide"><span>出现场次</span><input value="${asset.used} / ${currentVariant.scene}" /></label>
-                <label class="wide"><span>当前子形象</span><input value="${currentVariant.name} · ${currentVariant.status}" /></label>
+                <label class="wide"><span>当前${editorLabel.variantNoun}</span><input value="${currentVariant.name} · ${currentVariant.status}" /></label>
               </div>
               <div class="role-meta-box">
-                <b>角色描述</b>
-                <p>${asset.meta}，${currentVariant.tone}。用于后续分镜复用，生成时保持五官、服饰主色和气质一致。</p>
+                <b>${typeLabel}描述</b>
+                <p>${asset.meta}，${currentVariant.tone}。用于后续分镜复用，生成时保持${editorLabel.consistencyNote}一致。</p>
               </div>
             </div>
           </section>
         </div>
       </section>
-    </div>
-  `;
+    `,
+    "",
+    { hideTitle: true }
+  );
+}
+
+function assetEditorLabels(typeLabel) {
+  if (typeLabel === "场景") {
+    return {
+      variantListTitle: "场景版本列表",
+      variantNoun: "场景版本",
+      variantNames: ["基础场景", "日景版本", "夜景版本", "镜头特写"],
+      tones: ["空间结构清晰 / 可复用", "自然光 / 人物入场", "烛火与暗光 / 情绪压迫", "局部细节 / 近景复用"],
+      secondaryField: "光影风格",
+      secondaryValue: "国漫二次元 / 电影感光影",
+      consistencyNote: "空间结构、主色调和光影方向"
+    };
+  }
+  if (typeLabel === "道具") {
+    return {
+      variantListTitle: "道具版本列表",
+      variantNoun: "道具版本",
+      variantNames: ["基础道具", "手持版本", "特写版本", "破损版本"],
+      tones: ["正面展示 / 干净背景", "角色手持 / 动作衔接", "纹理细节 / 关键剧情", "冲突后状态 / 分镜复用"],
+      secondaryField: "材质质感",
+      secondaryValue: "精致纹理 / 高识别度",
+      consistencyNote: "轮廓、材质、颜色和关键纹理"
+    };
+  }
+  return {
+    variantListTitle: "子形象列表",
+    variantNoun: "子形象",
+    variantNames: ["基础形象", "红色嫁衣", "冷宫夜行", "特写表情"],
+    tones: ["正面半身 / 统一角色脸", "宫门反击 / 情绪克制", "雨夜披风 / 暗光", "眼神坚定 / 近景"],
+    secondaryField: "音色",
+    secondaryValue: "冷静女声 / 克制反击",
+    consistencyNote: "五官、服饰主色和气质"
+  };
 }
 
 function mangaStoryboardPage() {
