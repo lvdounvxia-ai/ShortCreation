@@ -799,7 +799,7 @@ function modeStageRail(stages, current, dataAttr, tone = "") {
 
 function modePageShell(eyebrow, title, desc, content, footer = "", options = {}) {
   return `
-    <div class="mode-page">
+    <div class="mode-page ${options.className || ""}">
       ${options.hideTitle ? "" : `<div class="mode-page-title">
         <div>
           <p class="eyebrow">${eyebrow}</p>
@@ -845,20 +845,24 @@ function shortTopicsPage() {
     "热点选题",
     "从热点池筛选可制作选题，确认角度、目标账号和首屏钩子。",
     `
-      <div class="short-topic-layout">
+      <div class="feature-disabled-banner">
+        <b>功能暂时无效</b>
+        <span>热点选题工作流还在确认中，当前仅保留页面占位。</span>
+      </div>
+      <div class="short-topic-layout feature-disabled-content" aria-disabled="true">
         <section class="panel">
-          <div class="panel-head"><span>热点池</span><button class="ghost-button" data-action="toast" data-message="热点榜单已刷新">${icon("clock")}刷新</button></div>
-          <div class="mini-filter-bar">${["全部", "剧情", "情感", "悬疑"].map(item => `<button class="${state.shortTopicFilter === item ? "active" : ""}" data-topic-filter="${item}">${item}</button>`).join("")}</div>
+          <div class="panel-head"><span>热点池</span><button class="ghost-button disabled" data-action="forbidden" data-message="热点选题功能暂时无效">${icon("clock")}刷新</button></div>
+          <div class="mini-filter-bar">${["全部", "剧情", "情感", "悬疑"].map(item => `<button class="${state.shortTopicFilter === item ? "active" : ""} disabled" data-action="forbidden" data-message="热点选题功能暂时无效">${item}</button>`).join("")}</div>
           <div class="topic-list roomy">
             ${hotTopics.map((topic, index) => `
-              <button class="topic-card ${state.selectedTopic === index ? "active" : ""}" data-topic-index="${index}">
+              <button class="topic-card disabled ${state.selectedTopic === index ? "active" : ""}" data-action="forbidden" data-message="热点选题功能暂时无效">
                 <b>${topic.title}</b><span>热度 ${topic.heat} · ${topic.angle}</span><em>${topic.status}</em>
               </button>
             `).join("")}
           </div>
         </section>
         <section class="panel topic-detail-card">
-          <div class="panel-head"><span>选题详情</span><button class="ghost-button" data-action="toast" data-message="已认领当前选题">认领</button></div>
+          <div class="panel-head"><span>选题详情</span><button class="ghost-button disabled" data-action="forbidden" data-message="热点选题功能暂时无效">认领</button></div>
           <div class="topic-score">
             <div><b>92</b><span>热度</span></div>
             <div><b>低</b><span>重复风险</span></div>
@@ -877,7 +881,16 @@ function shortTopicsPage() {
         </section>
       </div>
     `,
-    modeFlowFooter(null, "script", "go-short", "进入脚本制作")
+    `
+      <div class="flow-footer feature-disabled-footer">
+        <span></span>
+        <div>
+          <button class="ghost-button disabled" data-action="forbidden" data-message="热点选题功能暂时无效">${icon("check")}保存草稿</button>
+          <button class="primary-button disabled" data-action="forbidden" data-message="热点选题功能暂时无效">进入脚本制作</button>
+        </div>
+      </div>
+    `,
+    { className: "short-topic-disabled" }
   );
 }
 
