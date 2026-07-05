@@ -23,6 +23,7 @@ const state = {
   teamFilter: "全部",
   selectedTeamMember: 0,
   selectedMemberRole: "owner",
+  sidebarCollapsed: false,
   toast: ""
 };
 
@@ -302,18 +303,19 @@ function shell(content) {
   const user = currentUser();
   const visibleNavItems = navItems.filter(item => !item.permission || hasPermission(item.permission));
   return `
-    <div class="product-shell">
+    <div class="product-shell ${state.sidebarCollapsed ? "sidebar-collapsed" : ""}">
       <aside class="sidebar">
         <div class="brand-block">
           <div class="brand-mark">剧</div>
-          <div>
+          <div class="brand-copy">
             <div class="brand-name">剧出格</div>
             <div class="brand-sub">AI内容生产平台</div>
           </div>
+          <button class="sidebar-toggle" data-sidebar-toggle title="${state.sidebarCollapsed ? "展开侧边栏" : "收起侧边栏"}">${state.sidebarCollapsed ? "›" : "‹"}</button>
         </div>
         <nav class="nav-list">
           ${visibleNavItems.map(item => `
-            <button class="nav-item ${state.section === item.id ? "active" : ""}" data-section="${item.id}">
+            <button class="nav-item ${state.section === item.id ? "active" : ""}" data-section="${item.id}" title="${item.label}">
               ${icon(item.icon)}
               <span><b>${item.label}</b><em>${item.desc}</em></span>
             </button>
@@ -341,7 +343,6 @@ function shell(content) {
             ${hasPermission("project:create")
               ? `<button class="primary-button" data-action="new-project">${icon("plus")}新建项目</button>`
               : `<button class="primary-button disabled" data-action="forbidden" data-message="当前角色没有新建项目权限">${icon("plus")}新建项目</button>`}
-            <button class="ghost-button" data-logout>退出</button>
           </div>
         </header>
         ${content}
@@ -367,16 +368,21 @@ function renderStudio() {
 
 function stageRail() {
   const currentIndex = mangaStages.findIndex(stage => stage.id === state.mangaStage);
+  const prevStage = mangaStages[currentIndex - 1];
+  const nextStage = mangaStages[currentIndex + 1];
   return `
-    <div class="stage-rail">
-      ${mangaStages.map((stage, index) => {
-        const status = index < currentIndex ? "done" : index === currentIndex ? "active" : "todo";
-        return `
-        <button class="stage-chip ${state.mangaStage === stage.id ? "active" : ""} ${status}" data-manga-stage="${stage.id}">
-          <span>${index + 1}</span>${stage.label}
-        </button>
-      `;
-      }).join("")}
+    <div class="stage-rail-row">
+      <div class="stage-rail">
+        ${mangaStages.map((stage, index) => {
+          const status = index < currentIndex ? "done" : index === currentIndex ? "active" : "todo";
+          return `
+          <button class="stage-chip ${state.mangaStage === stage.id ? "active" : ""} ${status}" data-manga-stage="${stage.id}">
+            <span>${index + 1}</span>${stage.label}
+          </button>
+        `;
+        }).join("")}
+      </div>
+      ${stageRailActions(prevStage?.id, nextStage?.id, "go-stage", nextStage ? `进入${nextStage.label}` : "")}
     </div>
   `;
 }
@@ -399,13 +405,6 @@ function mangaPageShell(eyebrow, title, desc, content, footer, options = {}) {
   return `
     <div class="manga-page">
       <div class="manga-page-main">
-        ${options.hideTitle ? "" : `<div class="manga-page-title">
-          <div>
-            <p class="eyebrow">${eyebrow}</p>
-            <h2>${title}</h2>
-            <span>${desc}</span>
-          </div>
-        </div>`}
         ${content}
         ${footer || ""}
       </div>
@@ -414,13 +413,17 @@ function mangaPageShell(eyebrow, title, desc, content, footer, options = {}) {
 }
 
 function flowFooter(prev, next, primaryLabel) {
+  return "";
+}
+
+function stageRailActions(prev, next, dataAttr, primaryLabel = "下一步", options = {}) {
+  const disabled = options.disabled;
+  const message = options.message || "当前功能暂时无效";
   return `
-    <div class="flow-footer">
-      ${prev ? `<button class="ghost-button" data-go-stage="${prev}">上一步</button>` : `<span></span>`}
-      <div>
-        <button class="ghost-button" data-action="toast" data-message="当前页面草稿已保存">${icon("check")}保存草稿</button>
-        ${next ? `<button class="primary-button" data-go-stage="${next}">${primaryLabel || "下一步"}</button>` : ""}
-      </div>
+    <div class="stage-rail-actions">
+      ${prev ? `<button class="ghost-button" data-${dataAttr}="${prev}">上一步</button>` : ""}
+      <button class="ghost-button ${disabled ? "disabled" : ""}" data-action="${disabled ? "forbidden" : "toast"}" data-message="${disabled ? message : "当前页面草稿已保存"}">${icon("check")}保存草稿</button>
+      ${next ? `<button class="primary-button ${disabled ? "disabled" : ""}" ${disabled ? `data-action="forbidden" data-message="${message}"` : `data-${dataAttr}="${next}"`}>${primaryLabel}</button>` : ""}
     </div>
   `;
 }
@@ -441,7 +444,7 @@ function mangaImportPage() {
             <div class="file-badge">DOCX</div>
             <div>
               <h3>都市异能录_第1季.docx</h3>
-              <p>支持 DOCX / PDF / TXT / Markdown / Excel；当前识别 20 集、23 场、约 18,600 字。</p>
+              <p>支持 DOCX / PDF / TXT / Markdown / Excel。</p>
             </div>
             <button class="ghost-button" data-action="toast" data-message="请选择新的剧本文档">${icon("upload")}替换</button>
           </div>
@@ -830,18 +833,24 @@ function assetRow(asset) {
   `;
 }
 
-function modeStageRail(stages, current, dataAttr, tone = "") {
+function modeStageRail(stages, current, dataAttr, tone = "", options = {}) {
   const currentIndex = stages.findIndex(stage => stage.id === current);
+  const prevStage = stages[currentIndex - 1];
+  const nextStage = stages[currentIndex + 1];
+  const actionAttr = options.actionAttr || dataAttr;
   return `
-    <div class="stage-rail ${tone}">
-      ${stages.map((stage, index) => {
-        const status = index < currentIndex ? "done" : index === currentIndex ? "active" : "todo";
-        return `
-          <button class="stage-chip ${current === stage.id ? "active" : ""} ${status}" data-${dataAttr}="${stage.id}">
-            <span>${index + 1}</span>${stage.label}
-          </button>
-        `;
-      }).join("")}
+    <div class="stage-rail-row">
+      <div class="stage-rail ${tone}">
+        ${stages.map((stage, index) => {
+          const status = index < currentIndex ? "done" : index === currentIndex ? "active" : "todo";
+          return `
+            <button class="stage-chip ${current === stage.id ? "active" : ""} ${status}" data-${dataAttr}="${stage.id}">
+              <span>${index + 1}</span>${stage.label}
+            </button>
+          `;
+        }).join("")}
+      </div>
+      ${stageRailActions(prevStage?.id, nextStage?.id, actionAttr, nextStage ? `进入${nextStage.label}` : "", { disabled: options.disabled, message: options.disabledMessage })}
     </div>
   `;
 }
@@ -849,13 +858,6 @@ function modeStageRail(stages, current, dataAttr, tone = "") {
 function modePageShell(eyebrow, title, desc, content, footer = "", options = {}) {
   return `
     <div class="mode-page ${options.className || ""}">
-      ${options.hideTitle ? "" : `<div class="mode-page-title">
-        <div>
-          <p class="eyebrow">${eyebrow}</p>
-          <h2>${title}</h2>
-          <span>${desc}</span>
-        </div>
-      </div>`}
       ${content}
       ${footer}
     </div>
@@ -863,20 +865,12 @@ function modePageShell(eyebrow, title, desc, content, footer = "", options = {})
 }
 
 function modeFlowFooter(prev, next, dataAttr, primaryLabel = "下一步") {
-  return `
-    <div class="flow-footer">
-      ${prev ? `<button class="ghost-button" data-${dataAttr}="${prev}">上一步</button>` : `<span></span>`}
-      <div>
-        <button class="ghost-button" data-action="toast" data-message="当前页面草稿已保存">${icon("check")}保存草稿</button>
-        ${next ? `<button class="primary-button" data-${dataAttr}="${next}">${primaryLabel}</button>` : ""}
-      </div>
-    </div>
-  `;
+  return "";
 }
 
 function shortStudio() {
   return `
-    ${modeStageRail(shortStages, state.shortStage, "short-stage", "blue")}
+    ${modeStageRail(shortStages, state.shortStage, "short-stage", "blue", { actionAttr: "go-short", disabled: state.shortStage === "topics", disabledMessage: "热点选题功能暂时无效" })}
     ${shortStagePage()}
   `;
 }
@@ -930,15 +924,7 @@ function shortTopicsPage() {
         </section>
       </div>
     `,
-    `
-      <div class="flow-footer feature-disabled-footer">
-        <span></span>
-        <div>
-          <button class="ghost-button disabled" data-action="forbidden" data-message="热点选题功能暂时无效">${icon("check")}保存草稿</button>
-          <button class="primary-button disabled" data-action="forbidden" data-message="热点选题功能暂时无效">进入脚本制作</button>
-        </div>
-      </div>
-    `,
+    "",
     { className: "short-topic-disabled" }
   );
 }
@@ -1104,7 +1090,7 @@ function shortVideoShotCard(shot, index) {
 
 function clipsStudio() {
   return `
-    ${modeStageRail(clipStages, state.clipStage, "clip-stage", "red")}
+    ${modeStageRail(clipStages, state.clipStage, "clip-stage", "red", { actionAttr: "go-clip" })}
     ${clipStagePage()}
   `;
 }
@@ -1398,7 +1384,7 @@ function render() {
 
 document.addEventListener("click", (event) => {
   const login = event.target.closest("[data-login]");
-  const logout = event.target.closest("[data-logout]");
+  const sidebarToggle = event.target.closest("[data-sidebar-toggle]");
   const loginMode = event.target.closest("[data-login-mode]");
   const nav = event.target.closest("[data-section]");
   const studioTab = event.target.closest("[data-studio-tab]");
@@ -1427,19 +1413,15 @@ document.addEventListener("click", (event) => {
   const memberRole = event.target.closest("[data-member-role]");
   const action = event.target.closest("[data-action]");
   const inertButton = event.target.closest("button");
-  const handled = login || logout || loginMode || nav || studioTab || mangaStage || goStage || shortStage || goShort || clipStage || goClip || assetFilter || libraryAssetFilter || assetCard || openAssetEditor || closeAssetEditor || assetVariant || libraryAsset || mangaScene || topicFilter || topicCard || shortShot || clipSegment || projectFilter || projectTile || teamFilter || teamMember || memberRole || action;
+  const handled = login || sidebarToggle || loginMode || nav || studioTab || mangaStage || goStage || shortStage || goShort || clipStage || goClip || assetFilter || libraryAssetFilter || assetCard || openAssetEditor || closeAssetEditor || assetVariant || libraryAsset || mangaScene || topicFilter || topicCard || shortShot || clipSegment || projectFilter || projectTile || teamFilter || teamMember || memberRole || action;
   const nextState = {};
 
+  if (sidebarToggle) nextState.sidebarCollapsed = !state.sidebarCollapsed;
   if (loginMode) nextState.loginMode = loginMode.dataset.loginMode;
   if (login) {
     nextState.isAuthenticated = true;
     nextState.section = "workbench";
     nextState.selectedMemberRole = state.loginRole;
-  }
-  if (logout) {
-    nextState.isAuthenticated = false;
-    nextState.section = "workbench";
-    nextState.assetEditorOpen = false;
   }
   if (nav) nextState.section = nav.dataset.section;
   if (studioTab) {
