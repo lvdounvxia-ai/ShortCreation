@@ -326,14 +326,16 @@ function shell(content) {
         </button>
       </aside>
       <main class="main">
-        <header class="topbar">
-          <div class="top-studio-tabs" aria-label="制作模式">
-            ${studioTabs.map(tab => `
-              <button class="studio-tab ${state.studioTab === tab.id ? "active" : ""} ${tab.tone}" data-studio-tab="${tab.id}">
-                ${tab.label}
-              </button>
-            `).join("")}
-          </div>
+        <header class="topbar ${state.section === "studio" ? "" : "topbar-compact"}">
+          ${state.section === "studio" ? `
+            <div class="top-studio-tabs" aria-label="制作模式">
+              ${studioTabs.map(tab => `
+                <button class="studio-tab ${state.studioTab === tab.id ? "active" : ""} ${tab.tone}" data-studio-tab="${tab.id}">
+                  ${tab.label}
+                </button>
+              `).join("")}
+            </div>
+          ` : `<span class="topbar-spacer" aria-hidden="true"></span>`}
           <div class="top-actions">
             <button class="icon-button" data-action="toast" data-message="暂无新通知">${icon("bell")}</button>
             ${hasPermission("project:create")
