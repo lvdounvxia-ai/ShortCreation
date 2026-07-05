@@ -68,7 +68,7 @@ button {
 }
 
 .product-shell.sidebar-collapsed {
-  grid-template-columns: 84px minmax(0, 1fr);
+  grid-template-columns: 76px minmax(0, 1fr);
 }
 
 .sidebar {
@@ -227,12 +227,20 @@ button {
 }
 
 .sidebar-collapsed .sidebar {
-  padding: 22px 14px;
+  padding: 20px 12px;
 }
 
 .sidebar-collapsed .brand-block {
   justify-content: center;
-  padding: 8px 0 24px;
+  padding: 0 0 22px;
+}
+
+.sidebar-collapsed .brand-mark {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  font-size: 20px;
+  box-shadow: 0 12px 28px rgba(23, 33, 43, 0.18);
 }
 
 .sidebar-collapsed .brand-copy,
@@ -244,18 +252,44 @@ button {
 
 .sidebar-collapsed .sidebar-toggle {
   position: absolute;
-  right: -9px;
-  top: 0;
+  right: -17px;
+  top: 4px;
+  z-index: 2;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  box-shadow: 0 8px 22px rgba(23, 33, 43, 0.12);
 }
 
 .sidebar-collapsed .nav-item,
 .sidebar-collapsed .profile-entry {
+  width: 48px;
+  min-height: 48px;
   justify-content: center;
-  padding: 10px;
+  padding: 0;
+  border-radius: 12px;
 }
 
 .sidebar-collapsed .nav-item .icon {
   margin: 0;
+  width: 21px;
+  height: 21px;
+}
+
+.sidebar-collapsed .nav-list {
+  justify-items: center;
+  gap: 14px;
+}
+
+.sidebar-collapsed .profile-entry {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.sidebar-collapsed .profile-avatar {
+  width: 34px;
+  height: 34px;
+  font-size: 13px;
 }
 
 .main {
